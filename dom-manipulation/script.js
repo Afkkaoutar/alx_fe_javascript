@@ -61,7 +61,7 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
     document.getElementById("newQuoteCategory").value = "";
     alert("Quote added successfully!");
     postQuoteToServer(newQuote);
-    syncWithServer();
+    syncQuotes();
   }
   
   function createAddQuoteForm() {
@@ -131,7 +131,7 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
     }
   }
   
-  async function syncWithServer() {
+  async function syncQuotes() {
     syncStatus.textContent = "Syncing with server...";
     const serverQuotes = await fetchQuotesFromServer();
   
@@ -154,7 +154,7 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
     setTimeout(() => { syncStatus.textContent = ""; }, 3000);
   }
   
-  setInterval(syncWithServer, 30000);
+  setInterval(syncQuotes, 30000);
   
   // ==================== INIT ====================
   
@@ -163,5 +163,5 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
   createAddQuoteForm();
   filterQuotes();
   restoreLastSession();
-  syncWithServer();
+  syncQuotes();
   

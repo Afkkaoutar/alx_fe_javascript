@@ -25,9 +25,7 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
     });
   
     const lastFilter = localStorage.getItem("lastFilter");
-    if (lastFilter) {
-      categoryFilter.value = lastFilter;
-    }
+    if (lastFilter) categoryFilter.value = lastFilter;
   }
   
   function showRandomQuote() {
@@ -55,12 +53,14 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
       return;
     }
   
-    quotes.push({ text: newText, category: newCategory });
+    const newQuote = { text: newText, category: newCategory };
+    quotes.push(newQuote);
     saveQuotes();
     populateCategories();
     document.getElementById("newQuoteText").value = "";
     document.getElementById("newQuoteCategory").value = "";
     alert("Quote added successfully!");
+    postQuoteToServer(newQuote);
     syncWithServer();
   }
   
@@ -84,7 +84,6 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
     formContainer.appendChild(inputCategory);
   
     const addButton = document.createElement("button");
-    addButton.id = "addQuoteBtn";
     addButton.textContent = "Add Quote";
     formContainer.appendChild(addButton);
   
@@ -111,16 +110,24 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
     try {
       const response = await fetch("https://jsonplaceholder.typicode.com/posts?_limit=5");
       const data = await response.json();
-  
-      const serverQuotes = data.map(post => ({
-        text: post.title,
-        category: "Server"
-      }));
-  
-      return serverQuotes;
+      return data.map(post => ({ text: post.title, category: "Server" }));
     } catch (error) {
       console.error("Server fetch failed:", error);
       return [];
+    }
+  }
+  
+  async function postQuoteToServer(quote) {
+    try {
+      const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(quote)
+      });
+      const result = await response.json();
+      console.log("Quote posted to server:", result);
+    } catch (error) {
+      console.error("Error posting quote:", error);
     }
   }
   
@@ -133,29 +140,20 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
   
     serverQuotes.forEach(serverQuote => {
       const exists = mergedQuotes.some(q => q.text === serverQuote.text);
-      if (!exists) {
-        mergedQuotes.push(serverQuote);
-      } else {
-        conflicts++;
-      }
+      if (!exists) mergedQuotes.push(serverQuote);
+      else conflicts++;
     });
   
-    if (conflicts > 0) {
-      syncStatus.textContent = `Conflicts detected: ${conflicts}. Server version kept.`;
-    } else {
-      syncStatus.textContent = "Sync completed successfully.";
-    }
+    if (conflicts > 0) syncStatus.textContent = `Conflicts detected: ${conflicts}. Server version kept.`;
+    else syncStatus.textContent = "Sync completed successfully.";
   
     quotes = mergedQuotes;
     saveQuotes();
     populateCategories();
   
-    setTimeout(() => {
-      syncStatus.textContent = "";
-    }, 3000);
+    setTimeout(() => { syncStatus.textContent = ""; }, 3000);
   }
   
-  // auto-sync every 30 seconds
   setInterval(syncWithServer, 30000);
   
   // ==================== INIT ====================

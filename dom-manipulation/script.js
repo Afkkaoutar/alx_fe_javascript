@@ -61,7 +61,7 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
     document.getElementById("newQuoteText").value = "";
     document.getElementById("newQuoteCategory").value = "";
     alert("Quote added successfully!");
-    syncWithServer(); // auto-sync after adding
+    syncWithServer();
   }
   
   function createAddQuoteForm() {
@@ -105,9 +105,9 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
     }
   }
   
-  // ============ Server Simulation & Sync ============
+  // ==================== SERVER SYNC ====================
   
-  async function fetchServerQuotes() {
+  async function fetchQuotesFromServer() {
     try {
       const response = await fetch("https://jsonplaceholder.typicode.com/posts?_limit=5");
       const data = await response.json();
@@ -126,7 +126,7 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
   
   async function syncWithServer() {
     syncStatus.textContent = "Syncing with server...";
-    const serverQuotes = await fetchServerQuotes();
+    const serverQuotes = await fetchQuotesFromServer();
   
     let mergedQuotes = [...quotes];
     let conflicts = 0;
@@ -155,10 +155,11 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
     }, 3000);
   }
   
-  // Sync every 30 seconds
+  // auto-sync every 30 seconds
   setInterval(syncWithServer, 30000);
   
-  // ============ Init ============
+  // ==================== INIT ====================
+  
   newQuoteBtn.addEventListener("click", showRandomQuote);
   populateCategories();
   createAddQuoteForm();

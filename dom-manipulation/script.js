@@ -49,7 +49,9 @@ const quotes = [
     populateCategories();
     document.getElementById("newQuoteText").value = "";
     document.getElementById("newQuoteCategory").value = "";
-    alert("Quote added successfully!");
+    console.log("✅ New quote added:", quotes[quotes.length - 1]);
+    console.log("📚 All quotes now:", quotes);
+    alert("Quote added successfully! You can now find it in the dropdown.");
   }
   
   newQuoteBtn.addEventListener("click", showRandomQuote);
